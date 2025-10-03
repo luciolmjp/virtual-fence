@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento de Segurança Eletrônica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div class="min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white shadow-lg rounded-xl mb-6 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h1 class="text-4xl font-bold text-white mb-2">Orçamento de Segurança Eletrônica</h1>
+                            <p class="text-blue-100 text-lg">Sistema profissional de geração de orçamentos</p>
+                        </div>
+                        <button onclick="downloadExcel()" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold hover:bg-blue-50 transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl hover:scale-105 transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Gerar Orçamento Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Seletor de Tabelas -->
+                <div class="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b">
+                    <p class="text-sm font-bold text-gray-700 mb-4 uppercase tracking-wide">Tabela de Preços:</p>
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="selectTable('A')" id="btnA" class="px-8 py-3 rounded-lg font-bold transition-all bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-300 hover:border-blue-400 shadow-sm hover:shadow-md">
+                            Tabela A
+                        </button>
+                        <button onclick="selectTable('B')" id="btnB" class="px-8 py-3 rounded-lg font-bold transition-all bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-300 hover:border-blue-400 shadow-sm hover:shadow-md">
+                            Tabela B
+                        </button>
+                        <button onclick="selectTable('C')" id="btnC" class="px-8 py-3 rounded-lg font-bold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg border-2 border-blue-600">
+                            Tabela C
+                        </button>
+                        <button onclick="selectTable('D')" id="btnD" class="px-8 py-3 rounded-lg font-bold transition-all bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-300 hover:border-blue-400 shadow-sm hover:shadow-md">
+                            Tabela D
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Itens -->
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
+                                <th class="text-left p-5 font-bold text-sm uppercase tracking-wide">Descrição do Item</th>
+                                <th class="text-center p-5 font-bold text-sm uppercase tracking-wide w-40">Quantidade</th>
+                                <th class="text-right p-5 font-bold text-sm uppercase tracking-wide w-40">Valor Unit.</th>
+                                <th class="text-right p-5 font-bold text-sm uppercase tracking-wide w-40">Instalação</th>
+                                <th class="text-right p-5 font-bold text-sm uppercase tracking-wide w-40">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                        <tfoot>
+                            <tr class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                <td colspan="4" class="p-5 text-right font-bold text-xl uppercase tracking-wide">Total Geral:</td>
+                                <td class="p-5 text-right font-bold text-2xl" id="totalGeral">R$ 0,00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-6 text-gray-600 text-sm">
+                <p>Sistema de Orçamento Profissional - Segurança Eletrônica</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const items = [
+            { id: 1, name: 'Câmera IP Bullet Positivo', install: 110, A: 237.89, B: 274.49, C: 365.98, D: 182.99 },
+            { id: 2, name: 'Câmera IM5', install: 110, A: 557.60, B: 643.38, C: 857.84, D: 428.92 },
+            { id: 3, name: 'Central de Alarme AMT 1000 Smart', install: 150, A: 434.36, B: 501.18, C: 668.24, D: 334.12 },
+            { id: 4, name: 'Sensor Interno IVP 1000 Sem Fio', install: 80, A: 107.64, B: 124.20, C: 165.60, D: 82.80 },
+            { id: 5, name: 'Sensor Externo IVP 7000 Sem Fio', install: 80, A: 475.02, B: 548.10, C: 730.80, D: 365.40 },
+            { id: 6, name: 'Controle XAC 2003', install: 0, A: 25.87, B: 29.85, C: 39.80, D: 19.90 },
+            { id: 7, name: 'Sirene', install: 0, A: 24.58, B: 28.37, C: 37.82, D: 18.91 },
+            { id: 8, name: 'Bateria Central', install: 0, A: 86.46, B: 99.77, C: 133.02, D: 66.51 },
+            { id: 9, name: 'Poste', install: 0, A: 1560.00, B: 1800.00, C: 2400.00, D: 1200.00 },
+            { id: 10, name: 'Security Box', install: 150, A: 1950.00, B: 2250.00, C: 3000.00, D: 1500.00 },
+            { id: 11, name: 'Grade Proteção para Câmeras', install: 0, A: 44.62, B: 51.48, C: 68.64, D: 34.32 },
+            { id: 12, name: 'Fonte Chaveada 12V', install: 0, A: 41.60, B: 48.00, C: 64.00, D: 32.00 },
+            { id: 13, name: 'Hub', install: 0, A: 59.67, B: 68.85, C: 91.80, D: 45.90 },
+            { id: 14, name: 'Cabo Manga 6 Vias (metro)', install: 0, A: 7.80, B: 9.00, C: 12.00, D: 6.00 },
+            { id: 15, name: 'Cabo Manga 4 Vias (metro)', install: 0, A: 5.20, B: 6.00, C: 8.00, D: 4.00 },
+            { id: 16, name: 'Cabo de Energia (metro)', install: 0, A: 1.30, B: 1.50, C: 2.00, D: 1.00 },
+            { id: 17, name: 'Cabo CFTV (metro)', install: 0, A: 1.08, B: 1.25, C: 1.66, D: 0.83 },
+            { id: 18, name: 'Cabo de Rede (metro)', install: 0, A: 1.30, B: 1.50, C: 2.00, D: 1.00 },
+            { id: 19, name: 'Régua de Energia', install: 0, A: 26.00, B: 30.00, C: 40.00, D: 20.00 },
+            { id: 20, name: 'Caixa de Passagem Emenda', install: 0, A: 20.80, B: 24.00, C: 32.00, D: 16.00 },
+            { id: 21, name: 'Fita Isolante', install: 0, A: 4.55, B: 5.25, C: 7.00, D: 3.50 },
+            { id: 22, name: 'Controle de Acesso Facial 3531', install: 0, A: 961.99, B: 1109.99, C: 1479.98, D: 739.99 },
+            { id: 23, name: 'Controle de Acesso Facial 3532', install: 0, A: 1104.87, B: 1274.85, C: 1699.80, D: 849.90 },
+            { id: 24, name: 'Controle de Acesso Facial 3532 MF W', install: 0, A: 1560.00, B: 1800.00, C: 2400.00, D: 1200.00 }
+        ];
+
+        let selectedTable = 'C';
+        let quantities = {};
+
+        function selectTable(table) {
+            selectedTable = table;
+            ['A', 'B', 'C', 'D'].forEach(t => {
+                const btn = document.getElementById('btn' + t);
+                if (t === table) {
+                    btn.className = 'px-8 py-3 rounded-lg font-bold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg border-2 border-blue-600';
+                } else {
+                    btn.className = 'px-8 py-3 rounded-lg font-bold transition-all bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-300 hover:border-blue-400 shadow-sm hover:shadow-md';
+                }
+            });
+            renderTable();
+        }
+
+        function updateQuantity(id, value) {
+            quantities[id] = parseFloat(value) || 0;
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            let total = 0;
+            items.forEach(item => {
+                const qty = quantities[item.id] || 0;
+                const price = item[selectedTable];
+                const installCost = item.install * qty;
+                const itemTotal = (qty * price) + installCost;
+                total += itemTotal;
+
+                document.getElementById('total-' + item.id).textContent = 'R$ ' + itemTotal.toFixed(2);
+                document.getElementById('install-' + item.id).textContent = 'R$ ' + installCost.toFixed(2);
+            });
+            document.getElementById('totalGeral').textContent = 'R$ ' + total.toFixed(2);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            items.forEach((item, index) => {
+                const qty = quantities[item.id] || 0;
+                const price = item[selectedTable];
+                const installCost = item.install * qty;
+                const itemTotal = (qty * price) + installCost;
+
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white hover:bg-blue-50 transition-colors border-b border-gray-200' : 'bg-slate-50 hover:bg-blue-50 transition-colors border-b border-gray-200';
+                tr.innerHTML = `
+                    <td class="p-4 text-gray-800 font-medium">${item.name}</td>
+                    <td class="p-4">
+                        <input type="number" min="0" step="0.01" value="${qty || ''}" 
+                            onchange="updateQuantity(${item.id}, this.value)"
+                            class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition-all"
+                            placeholder="0">
+                    </td>
+                    <td class="p-4 text-right text-gray-700 font-semibold">R$ ${price.toFixed(2)}</td>
+                    <td class="p-4 text-right text-gray-700 font-semibold" id="install-${item.id}">R$ ${installCost.toFixed(2)}</td>
+                    <td class="p-4 text-right font-bold text-blue-700 text-lg" id="total-${item.id}">R$ ${itemTotal.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            calculateTotals();
+        }
+
+        function downloadExcel() {
+            const itemsWithQuantity = items.filter(item => quantities[item.id] && quantities[item.id] > 0);
+            
+            if (itemsWithQuantity.length === 0) {
+                alert('Por favor, preencha pelo menos uma quantidade antes de gerar o orçamento.');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            let tabelaNome = '';
+            if (selectedTable === 'A') tabelaNome = 'Tabela A';
+            else if (selectedTable === 'B') tabelaNome = 'Tabela B';
+            else if (selectedTable === 'C') tabelaNome = 'Tabela C';
+            else if (selectedTable === 'D') tabelaNome = 'Tabela D';
+
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+            const orcamentoData = [
+                ['ORÇAMENTO DE SEGURANÇA ELETRÔNICA'],
+                [],
+                ['Data:', dataAtual, '', 'Tabela de Preços:', tabelaNome],
+                [],
+                [],
+                ['ITEM', 'QTD', 'VALOR UNIT.', 'INSTALAÇÃO', 'TOTAL']
+            ];
+
+            let totalGeral = 0;
+
+            itemsWithQuantity.forEach(item => {
+                const qty = quantities[item.id];
+                const price = item[selectedTable];
+                const installCost = item.install * qty;
+                const itemTotal = (qty * price) + installCost;
+                totalGeral += itemTotal;
+
+                orcamentoData.push([
+                    item.name,
+                    qty,
+                    price,
+                    installCost,
+                    itemTotal
+                ]);
+            });
+
+            orcamentoData.push([]);
+            orcamentoData.push([]);
+            orcamentoData.push(['', '', '', 'TOTAL GERAL:', totalGeral]);
+
+            const wsOrcamento = XLSX.utils.aoa_to_sheet(orcamentoData);
+            
+            wsOrcamento['!cols'] = [
+                { wch: 45 },
+                { wch: 12 },
+                { wch: 16 },
+                { wch: 16 },
+                { wch: 16 }
+            ];
+
+            const range = XLSX.utils.decode_range(wsOrcamento['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (!wsOrcamento[cellAddress]) continue;
+                    
+                    if (R === 0) {
+                        wsOrcamento[cellAddress].s = {
+                            font: { bold: true, sz: 16 },
+                            alignment: { horizontal: 'center' }
+                        };
+                    }
+                    
+                    if (R === 5) {
+                        wsOrcamento[cellAddress].s = {
+                            font: { bold: true, sz: 11 },
+                            fill: { fgColor: { rgb: "2563EB" } },
+                            alignment: { horizontal: 'center' }
+                        };
+                    }
+                    
+                    if (C >= 2 && C <= 4 && R >= 6) {
+                        wsOrcamento[cellAddress].z = 'R$ #,##0.00';
+                    }
+                }
+            }
+
+            wsOrcamento['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, wsOrcamento, 'ORÇAMENTO');
+            XLSX.writeFile(wb, `Orcamento_Seguranca_${dataAtual.replace(/\//g, '-')}.xlsx`);
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
